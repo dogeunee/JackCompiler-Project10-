@@ -3,6 +3,7 @@
 CompilationEngine::CompilationEngine(string _ifile, string _ofile)
 {
     tokenizer.initFilename(_ifile);
+    tokenizer.advance();
     ofile.open(_ofile);
 }
 void CompilationEngine::eat(string str, TokenType in_ttype)
@@ -20,7 +21,6 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 ofile << "\t<keyword> " << tokenizer.keyWord() << " </keyword>\n";
-                tokenizer.advance();
             }
             break;
         case SYMBOL:
@@ -31,22 +31,19 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 ofile << "\t<symbol> " << tokenizer.symbol() << " </symbol>\n";
-                tokenizer.advance();
             }
             break;
         case IDENTIFIER:
             ofile << "\t<identifier> " << tokenizer.identifier() << " </identifier>\n";
-            tokenizer.advance();
             break;
         case INT_CONST:
             ofile << "\t<integerConstant> " << tokenizer.intVal() << " </integerConstant>\n";
-            tokenizer.advance();
             break;
         case STRING_CONST:
             ofile << "\t<stringConstant> " << tokenizer.stringVal() << " </stringConstant>\n";
-            tokenizer.advance();
             break;
         }
+        tokenizer.advance();
     }
     else
         cout << "wrong!\n";
@@ -56,34 +53,234 @@ void CompilationEngine::compileClass()
 {
     ofile << "<class>\n";
     eat("class", KEYWORD);
-    // identifier
-
+    eat("", IDENTIFIER);
+    eat("{", SYMBOL);
+    while (tokenizer.keyWord() == "static" || tokenizer.keyWord() == "field")
+    {
+        complieClassVarDec();
+    }
+    while (tokenizer.keyWord() == "constructor" || tokenizer.keyWord() == "function" || tokenizer.keyWord() == "method")
+    {
+        compileSubroutine();
+    }
+    eat("}", SYMBOL);
     ofile << "</class>\n";
 }
 void CompilationEngine::complieClassVarDec()
 {
+    if (tokenizer.keyWord() == "static")
+    {
+        eat("static", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "field")
+    {
+        eat("field", KEYWORD);
+    }
+
+    // type
+    if (tokenizer.keyWord() == "int")
+    {
+        eat("int", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "char")
+    {
+        eat("field", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "boolean")
+    {
+        eat("field", KEYWORD);
+    }
+    else
+    {
+        eat("", IDENTIFIER);
+    }
+
+    // varname
+    eat("", IDENTIFIER);
+    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    {
+        eat(",", SYMBOL);
+        eat("", IDENTIFIER);
+    }
+    eat(";", SYMBOL);
 }
+
 void CompilationEngine::compileSubroutine()
 {
+    if (tokenizer.keyWord() == "constructor")
+    {
+        eat("constructor", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "function")
+    {
+        eat("function", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "method")
+    {
+        eat("method", KEYWORD);
+    }
+    // void or type
+
+    if (tokenizer.keyWord() == "void")
+    {
+        eat("void", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "int")
+    {
+        eat("int", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "char")
+    {
+        eat("field", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "boolean")
+    {
+        eat("field", KEYWORD);
+    }
+    else
+    {
+        eat("", IDENTIFIER);
+    }
+    // subroutineName
+    eat("", IDENTIFIER);
+    eat("{", SYMBOL);
+    compileParameterList();
+    eat("}", SYMBOL);
+    eat("", IDENTIFIER);
+    // subroutine body
+    eat("{", SYMBOL);
+    while (tokenizer.keyWord() == "var")
+    {
+        compileVarDec();
+    }
+    compileStatements();
+    eat("}", SYMBOL);
 }
 void CompilationEngine::compileParameterList()
 {
+    if (tokenizer.keyWord() == "int")
+    {
+        eat("int", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "char")
+    {
+        eat("field", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "boolean")
+    {
+        eat("field", KEYWORD);
+    }
+    else
+    {
+        eat("", IDENTIFIER);
+    }
+    eat("", IDENTIFIER);
+
+    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    {
+        eat(",", SYMBOL);
+        if (tokenizer.keyWord() == "int")
+        {
+            eat("int", KEYWORD);
+        }
+        else if (tokenizer.keyWord() == "char")
+        {
+            eat("field", KEYWORD);
+        }
+        else if (tokenizer.keyWord() == "boolean")
+        {
+            eat("field", KEYWORD);
+        }
+        else
+        {
+            eat("", IDENTIFIER);
+        }
+        eat("", IDENTIFIER);
+    }
+    eat(";", SYMBOL);
 }
 void CompilationEngine::compileVarDec()
 {
+    eat("var", KEYWORD);
+    if (tokenizer.keyWord() == "int")
+    {
+        eat("int", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "char")
+    {
+        eat("field", KEYWORD);
+    }
+    else if (tokenizer.keyWord() == "boolean")
+    {
+        eat("field", KEYWORD);
+    }
+    else
+    {
+        eat("", IDENTIFIER);
+    }
+    eat("", IDENTIFIER);
+    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    {
+        eat(",", SYMBOL);
+        eat("", IDENTIFIER);
+    }
+    eat(";", SYMBOL);
 }
 void CompilationEngine::compileStatements()
 {
+    string start = tokenizer.keyWord();
+    while (start == "let" || start == "if" || start == "while" || start == "do" || start == "return")
+    {
+        if (start == "let")
+        {
+            compileLet();
+        }
+        else if (start == "if")
+        {
+            compileIf();
+        }
+        else if (start == "while")
+        {
+            compileWhile();
+        }
+        else if (start == "do")
+        {
+            compileDo();
+        }
+        else if (start == "return")
+        {
+            compileReturn();
+        }
+    }
 }
+
 void CompilationEngine::compileDo()
 {
+    cout << "<doStatement>\n";
+    eat("do", KEYWORD);
+    // subroutineCall
+    eat("", IDENTIFIER);
+    eat("(", SYMBOL);
+    // compileExpressionList();
+    eat("", IDENTIFIER);
+    eat(")", SYMBOL);
+    eat(";", SYMBOL);
+    cout << "</doStatement>\n";
 }
 void CompilationEngine::compileLet()
 {
     cout << "<letStatement>\n";
+    eat("let", KEYWORD);
     eat("", IDENTIFIER);
+    if (tokenizer.symbol() == '[')
+    {
+        eat("[", SYMBOL);
+        eat("", IDENTIFIER);
+        eat("]", SYMBOL);
+    }
     eat("=", SYMBOL);
-    compileExpression();
+    // compileExpression();
+    eat("", IDENTIFIER);
     eat(";", SYMBOL);
     cout << "</letStatement>\n";
 }
@@ -92,7 +289,7 @@ void CompilationEngine::compileWhile()
     ofile << "<whileStatement>\n";
     eat("while", KEYWORD);
     eat("(", SYMBOL);
-    compileExpression();
+    eat("", IDENTIFIER);
     eat(")", SYMBOL);
     eat("{", SYMBOL);
     compileStatements();
@@ -102,9 +299,27 @@ void CompilationEngine::compileWhile()
 }
 void CompilationEngine::compileReturn()
 {
+    eat("return", KEYWORD);
+    eat("", IDENTIFIER);
+    eat(";", SYMBOL);
 }
 void CompilationEngine::compileIf()
 {
+    eat("if", KEYWORD);
+    eat("(", SYMBOL);
+    eat("", IDENTIFIER);
+    eat(")", SYMBOL);
+    eat("{", SYMBOL);
+    compileStatements();
+    eat("}", SYMBOL);
+    if (tokenizer.keyWord() == "else")
+    {
+        eat("else", KEYWORD);
+        eat("{", SYMBOL);
+        compileStatements();
+        eat("}", SYMBOL);
+    }
+    eat(";", SYMBOL);
 }
 void CompilationEngine::compileExpression()
 {
