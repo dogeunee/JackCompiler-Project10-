@@ -68,6 +68,7 @@ void CompilationEngine::compileClass()
 }
 void CompilationEngine::complieClassVarDec()
 {
+    ofile << "<classVarDec>\n";
     if (tokenizer.keyWord() == "static")
     {
         eat("static", KEYWORD);
@@ -97,16 +98,18 @@ void CompilationEngine::complieClassVarDec()
 
     // varname
     eat("", IDENTIFIER);
-    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    while (tokenizer.symbol() == ',')
     {
         eat(",", SYMBOL);
         eat("", IDENTIFIER);
     }
     eat(";", SYMBOL);
+    ofile << "</classVarDec>\n";
 }
 
 void CompilationEngine::compileSubroutine()
 {
+    ofile << "<subroutineDec>\n";
     if (tokenizer.keyWord() == "constructor")
     {
         eat("constructor", KEYWORD);
@@ -143,11 +146,12 @@ void CompilationEngine::compileSubroutine()
     }
     // subroutineName
     eat("", IDENTIFIER);
-    eat("{", SYMBOL);
+    eat("(", SYMBOL);
     compileParameterList();
-    eat("}", SYMBOL);
-    eat("", IDENTIFIER);
+    eat(")", SYMBOL);
     // subroutine body
+
+    ofile << "<subroutineBody>\n";
     eat("{", SYMBOL);
     while (tokenizer.keyWord() == "var")
     {
@@ -155,9 +159,12 @@ void CompilationEngine::compileSubroutine()
     }
     compileStatements();
     eat("}", SYMBOL);
+    ofile << "</subroutineBody>\n";
+    ofile << "</subroutineDec>\n";
 }
 void CompilationEngine::compileParameterList()
 {
+    ofile << "<parameterList>\n";
     if (tokenizer.keyWord() == "int")
     {
         eat("int", KEYWORD);
@@ -176,7 +183,7 @@ void CompilationEngine::compileParameterList()
     }
     eat("", IDENTIFIER);
 
-    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    while (tokenizer.symbol() == ',')
     {
         eat(",", SYMBOL);
         if (tokenizer.keyWord() == "int")
@@ -198,9 +205,11 @@ void CompilationEngine::compileParameterList()
         eat("", IDENTIFIER);
     }
     eat(";", SYMBOL);
+    ofile << "</parameterList>\n";
 }
 void CompilationEngine::compileVarDec()
 {
+    ofile << "<varDec>\n";
     eat("var", KEYWORD);
     if (tokenizer.keyWord() == "int")
     {
@@ -219,15 +228,17 @@ void CompilationEngine::compileVarDec()
         eat("", IDENTIFIER);
     }
     eat("", IDENTIFIER);
-    while (tokenizer.tokenType() == SYMBOL && tokenizer.symbol() == ',')
+    while (tokenizer.symbol() == ',')
     {
         eat(",", SYMBOL);
         eat("", IDENTIFIER);
     }
     eat(";", SYMBOL);
+    ofile << "</varDec>\n";
 }
 void CompilationEngine::compileStatements()
 {
+    ofile << "<statements>\n";
     string start = tokenizer.keyWord();
     while (start == "let" || start == "if" || start == "while" || start == "do" || start == "return")
     {
@@ -252,6 +263,7 @@ void CompilationEngine::compileStatements()
             compileReturn();
         }
     }
+    ofile << "</statements>\n";
 }
 
 void CompilationEngine::compileDo()
@@ -299,12 +311,18 @@ void CompilationEngine::compileWhile()
 }
 void CompilationEngine::compileReturn()
 {
+    ofile << "<returnStatement>\n";
     eat("return", KEYWORD);
-    eat("", IDENTIFIER);
+    if (!(tokenizer.symbol() == ';'))
+    {
+        eat("", IDENTIFIER);
+    }
     eat(";", SYMBOL);
+    ofile << "</returnStatement>\n";
 }
 void CompilationEngine::compileIf()
 {
+    ofile << "<ifStatement>\n";
     eat("if", KEYWORD);
     eat("(", SYMBOL);
     eat("", IDENTIFIER);
@@ -320,6 +338,7 @@ void CompilationEngine::compileIf()
         eat("}", SYMBOL);
     }
     eat(";", SYMBOL);
+    ofile << "</ifStatement>\n";
 }
 void CompilationEngine::compileExpression()
 {
