@@ -96,6 +96,7 @@ JackTokenizer::JackTokenizer(string filename)
 void JackTokenizer::initFilename(string s)
 {
     ifile.open(s);
+    ifile.get(c);
 }
 JackTokenizer::~JackTokenizer()
 {
@@ -147,6 +148,14 @@ void JackTokenizer::advance()
                 tType = IDENTIFIER;
             }
         }
+    }
+    if (token.length() == 0)
+    {
+        advance();
+    }
+    else
+    {
+        cout << token << "\n";
     }
 }
 
@@ -250,7 +259,7 @@ string JackTokenizer::keyWord()
 }
 char JackTokenizer::symbol()
 {
-    return c;
+    return token[0];
 }
 string JackTokenizer::identifier()
 {
