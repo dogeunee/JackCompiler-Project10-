@@ -51,9 +51,12 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
         }
         if (tokenizer.hasMoreTokens())
             tokenizer.advance();
+        cout << tokenizer.keyWord() << "\n";
     }
     else
+    {
         cout << "wrong TYPE\n";
+    }
 }
 
 void CompilationEngine::compileClass()
@@ -222,7 +225,6 @@ void CompilationEngine::compileParameterList()
             }
             eat("", IDENTIFIER);
         }
-        eat(";", SYMBOL);
     }
     // ofile
     ofile << "</parameterList>\n";
