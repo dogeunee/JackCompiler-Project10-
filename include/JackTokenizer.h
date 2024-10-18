@@ -5,8 +5,9 @@
 #include <iostream>
 using namespace std;
 
-class JackTokenizer{
-    public:
+class JackTokenizer
+{
+public:
     JackTokenizer();
     JackTokenizer(string filename);
     void initFilename(string s);
@@ -27,14 +28,16 @@ class JackTokenizer{
     bool keywordMapHas(string);
     bool symbolSetHas(char c);
     bool whiteSetHas(char c);
+    bool opSetHas(char c);
     void printToken();
 
-    private:
+private:
     ifstream ifile;
     TokenType tType;
     char c;
-    string token="";
+    string token = "";
     std::map<string, KeyWord> keywordMap;
     std::set<char> symbolSet;
     std::set<char> whiteSet;
+    std::set<char> opSet;
 };

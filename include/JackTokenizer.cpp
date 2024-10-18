@@ -44,6 +44,15 @@ JackTokenizer::JackTokenizer()
     whiteSet.insert(' ');
     whiteSet.insert('\n');
     whiteSet.insert('\t');
+    opSet.insert('+');
+    opSet.insert('-');
+    opSet.insert('*');
+    opSet.insert('/');
+    opSet.insert('&');
+    opSet.insert('|');
+    opSet.insert('<');
+    opSet.insert('>');
+    opSet.insert('=');
 }
 JackTokenizer::JackTokenizer(string filename)
 {
@@ -92,6 +101,15 @@ JackTokenizer::JackTokenizer(string filename)
     whiteSet.insert(' ');
     whiteSet.insert('\n');
     whiteSet.insert('\t');
+    opSet.insert('+');
+    opSet.insert('-');
+    opSet.insert('*');
+    opSet.insert('/');
+    opSet.insert('&');
+    opSet.insert('|');
+    opSet.insert('<');
+    opSet.insert('>');
+    opSet.insert('=');
 }
 void JackTokenizer::initFilename(string s)
 {
@@ -281,6 +299,10 @@ bool JackTokenizer::symbolSetHas(char c)
 bool JackTokenizer::whiteSetHas(char c)
 {
     return whiteSet.find(c) != whiteSet.end();
+}
+bool JackTokenizer::opSetHas(char c)
+{
+    return opSet.find(c) != opSet.end();
 }
 
 void JackTokenizer::printToken()

@@ -9,6 +9,7 @@ CompilationEngine::CompilationEngine(string _ifile, string _ofile)
 void CompilationEngine::eat(string str, TokenType in_ttype)
 {
     TokenType ttype = tokenizer.tokenType();
+    string symbol = string(1, tokenizer.symbol());
     if (in_ttype == ttype)
     {
         switch (ttype)
@@ -16,7 +17,7 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
         case KEYWORD:
             if (str != tokenizer.keyWord())
             {
-                cout << "wrong keyword\n";
+                std::cout << "wrong keyword\n";
             }
             else
             {
@@ -25,15 +26,34 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             }
             break;
         case SYMBOL:
-            if (str != string(1, tokenizer.symbol()))
+            if (str != symbol)
             {
-                cout << "wrong symbol\n"
-                     << str << " , " << string(1, tokenizer.symbol());
+                std::cout << "wrong symbol\n"
+                          << str << " , " << symbol;
             }
             else
             {
                 // ofile
-                ofile << "<symbol> " << tokenizer.symbol() << " </symbol>\n";
+                if (symbol == "<")
+                {
+                    ofile << "<symbol> " << "&lt;" << " </symbol>\n";
+                }
+                else if (symbol == ">")
+                {
+                    ofile << "<symbol> " << "&gt;" << " </symbol>\n";
+                }
+                else if (symbol == "\"")
+                {
+                    ofile << "<symbol> " << "&quot;" << " </symbol>\n";
+                }
+                else if (symbol == "&")
+                {
+                    ofile << "<symbol> " << "&amp;" << " </symbol>\n";
+                }
+                else
+                {
+                    ofile << "<symbol> " << tokenizer.symbol() << " </symbol>\n";
+                }
             }
             break;
         case IDENTIFIER:
@@ -51,11 +71,10 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
         }
         if (tokenizer.hasMoreTokens())
             tokenizer.advance();
-        cout << tokenizer.keyWord() << "\n";
     }
     else
     {
-        cout << "wrong TYPE\n";
+        std::cout << "wrong TYPE\n";
     }
 }
 
@@ -384,15 +403,22 @@ void CompilationEngine::compileExpression()
 {
     ofile << "<expression>\n";
     compileTerm();
+    while (tokenizer.opSetHas(tokenizer.symbol()))
+    {
+        eat(string(1, tokenizer.symbol()), SYMBOL);
+        compileTerm();
+    }
     ofile << "</expression>\n";
 }
 void CompilationEngine::compileTerm()
 {
     ofile << "<term>\n";
-    switch (tokenizer.tokenType())
+    TokenType tType = tokenizer.tokenType();
+    switch (tType)
     {
     case KEYWORD:
-        eat(tokenizer.keyWord(), KEYWORD);
+        if (tokenizer.keyWord() == "true" || tokenizer.keyWord() == "false" || tokenizer.keyWord() == "null" || tokenizer.keyWord() == "this")
+            eat(tokenizer.keyWord(), KEYWORD);
         break;
     case INT_CONST:
         eat(to_string(tokenizer.intVal()), INT_CONST);
@@ -400,8 +426,46 @@ void CompilationEngine::compileTerm()
     case STRING_CONST:
         eat(tokenizer.stringVal(), STRING_CONST);
         break;
+    case SYMBOL:
+        if (tokenizer.symbol() == '(')
+        {
+            eat("(", SYMBOL);
+            compileExpression();
+            eat(")", SYMBOL);
+        }
+        else if (tokenizer.symbol() == '-')
+        {
+            eat("-", SYMBOL);
+            compileTerm();
+        }
+        else if (tokenizer.symbol() == '~')
+        {
+            eat("~", SYMBOL);
+            compileTerm();
+        }
+        break;
     default:
         eat("", IDENTIFIER);
+        if (tokenizer.symbol() == '[')
+        {
+            eat("[", SYMBOL);
+            compileExpression();
+            eat("]", SYMBOL);
+        }
+        else if (tokenizer.symbol() == '(')
+        {
+            eat("(", SYMBOL);
+            compileExpressionList();
+            eat(")", SYMBOL);
+        }
+        else if (tokenizer.symbol() == '.')
+        {
+            eat(".", SYMBOL);
+            eat("", IDENTIFIER);
+            eat("(", SYMBOL);
+            compileExpressionList();
+            eat(")", SYMBOL);
+        }
         break;
     }
     ofile << "</term>\n";
