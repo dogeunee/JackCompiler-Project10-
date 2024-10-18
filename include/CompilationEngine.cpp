@@ -322,12 +322,11 @@ void CompilationEngine::compileLet()
     if (tokenizer.symbol() == '[')
     {
         eat("[", SYMBOL);
-        eat("", IDENTIFIER);
+        compileExpression();
         eat("]", SYMBOL);
     }
     eat("=", SYMBOL);
-    // compileExpression();
-    eat("", IDENTIFIER);
+    compileExpression();
     eat(";", SYMBOL);
     ofile << "</letStatement>\n";
 }
@@ -337,7 +336,7 @@ void CompilationEngine::compileWhile()
     ofile << "<whileStatement>\n";
     eat("while", KEYWORD);
     eat("(", SYMBOL);
-    eat("", IDENTIFIER);
+    compileExpression();
     eat(")", SYMBOL);
     eat("{", SYMBOL);
     compileStatements();
@@ -353,7 +352,7 @@ void CompilationEngine::compileReturn()
     eat("return", KEYWORD);
     if (!(tokenizer.symbol() == ';'))
     {
-        eat("", IDENTIFIER);
+        compileExpression();
     }
     eat(";", SYMBOL);
     // ofile
@@ -365,7 +364,7 @@ void CompilationEngine::compileIf()
     ofile << "<ifStatement>\n";
     eat("if", KEYWORD);
     eat("(", SYMBOL);
-    eat("", IDENTIFIER);
+    compileExpression();
     eat(")", SYMBOL);
     eat("{", SYMBOL);
     compileStatements();
@@ -382,13 +381,19 @@ void CompilationEngine::compileIf()
 }
 void CompilationEngine::compileExpression()
 {
-    eat("", IDENTIFIER);
+    ofile << "<expression>\n";
+    compileTerm();
+    ofile << "</expression>\n";
 }
 void CompilationEngine::compileTerm()
 {
+    ofile << "<term>\n";
+    eat("", IDENTIFIER);
+    ofile << "</term>\n";
 }
 void CompilationEngine::compileExpressionList()
 {
+    ofile << "<expressionList>\n";
     if (tokenizer.symbol() != ')')
     {
         compileExpression();
@@ -398,4 +403,5 @@ void CompilationEngine::compileExpressionList()
             compileExpression();
         }
     }
+    ofile << "</expressionList>\n";
 }
