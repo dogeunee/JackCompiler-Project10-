@@ -21,7 +21,7 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 // ofile
-                ofile << "\t<keyword> " << tokenizer.keyWord() << " </keyword>\n";
+                ofile << "<keyword> " << tokenizer.keyWord() << " </keyword>\n";
             }
             break;
         case SYMBOL:
@@ -33,20 +33,20 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 // ofile
-                ofile << "\t<symbol> " << tokenizer.symbol() << " </symbol>\n";
+                ofile << "<symbol> " << tokenizer.symbol() << " </symbol>\n";
             }
             break;
         case IDENTIFIER:
             // ofile
-            ofile << "\t<identifier> " << tokenizer.identifier() << " </identifier>\n";
+            ofile << "<identifier> " << tokenizer.identifier() << " </identifier>\n";
             break;
         case INT_CONST:
             // ofile
-            ofile << "\t<integerConstant> " << tokenizer.intVal() << " </integerConstant>\n";
+            ofile << "<integerConstant> " << tokenizer.intVal() << " </integerConstant>\n";
             break;
         case STRING_CONST:
             // ofile
-            ofile << "\t<stringConstant> " << tokenizer.stringVal() << " </stringConstant>\n";
+            ofile << "<stringConstant> " << tokenizer.stringVal() << " </stringConstant>\n";
             break;
         }
         if (tokenizer.hasMoreTokens())
@@ -98,7 +98,7 @@ void CompilationEngine::complieClassVarDec()
     }
     else if (tokenizer.keyWord() == "char")
     {
-        eat("field", KEYWORD);
+        eat("char", KEYWORD);
     }
     else if (tokenizer.keyWord() == "boolean")
     {
@@ -149,7 +149,7 @@ void CompilationEngine::compileSubroutine()
     }
     else if (tokenizer.keyWord() == "char")
     {
-        eat("field", KEYWORD);
+        eat("char", KEYWORD);
     }
     else if (tokenizer.keyWord() == "boolean")
     {
@@ -192,7 +192,7 @@ void CompilationEngine::compileParameterList()
         }
         else if (tokenizer.keyWord() == "char")
         {
-            eat("field", KEYWORD);
+            eat("char", KEYWORD);
         }
         else if (tokenizer.keyWord() == "boolean")
         {
@@ -213,7 +213,7 @@ void CompilationEngine::compileParameterList()
             }
             else if (tokenizer.keyWord() == "char")
             {
-                eat("field", KEYWORD);
+                eat("char", KEYWORD);
             }
             else if (tokenizer.keyWord() == "boolean")
             {
@@ -240,7 +240,7 @@ void CompilationEngine::compileVarDec()
     }
     else if (tokenizer.keyWord() == "char")
     {
-        eat("field", KEYWORD);
+        eat("char", KEYWORD);
     }
     else if (tokenizer.keyWord() == "boolean")
     {
@@ -343,7 +343,6 @@ void CompilationEngine::compileWhile()
     eat("{", SYMBOL);
     compileStatements();
     eat("}", SYMBOL);
-    eat(";", SYMBOL);
     // ofile
     ofile << "</whileStatement>\n";
 }
@@ -390,7 +389,21 @@ void CompilationEngine::compileExpression()
 void CompilationEngine::compileTerm()
 {
     ofile << "<term>\n";
-    eat("", IDENTIFIER);
+    switch (tokenizer.tokenType())
+    {
+    case KEYWORD:
+        eat(tokenizer.keyWord(), KEYWORD);
+        break;
+    case INT_CONST:
+        eat(to_string(tokenizer.intVal()), INT_CONST);
+        break;
+    case STRING_CONST:
+        eat(tokenizer.stringVal(), STRING_CONST);
+        break;
+    default:
+        eat("", IDENTIFIER);
+        break;
+    }
     ofile << "</term>\n";
 }
 void CompilationEngine::compileExpressionList()
