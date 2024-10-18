@@ -297,10 +297,20 @@ void CompilationEngine::compileDo()
     eat("do", KEYWORD);
     // subroutineCall
     eat("", IDENTIFIER);
-    eat("(", SYMBOL);
-    // compileExpressionList();
-    eat("", IDENTIFIER);
-    eat(")", SYMBOL);
+    if (tokenizer.symbol() == '(')
+    {
+        eat("(", SYMBOL);
+        compileExpressionList();
+        eat(")", SYMBOL);
+    }
+    else if (tokenizer.symbol() == '.')
+    {
+        eat(".", SYMBOL);
+        eat("", IDENTIFIER);
+        eat("(", SYMBOL);
+        compileExpressionList();
+        eat(")", SYMBOL);
+    }
     eat(";", SYMBOL);
     cout << "</doStatement>\n";
 }
@@ -372,10 +382,20 @@ void CompilationEngine::compileIf()
 }
 void CompilationEngine::compileExpression()
 {
+    eat("", IDENTIFIER);
 }
 void CompilationEngine::compileTerm()
 {
 }
 void CompilationEngine::compileExpressionList()
 {
+    if (tokenizer.symbol() != ')')
+    {
+        compileExpression();
+        while (tokenizer.symbol() == ',')
+        {
+            eat(",", SYMBOL);
+            compileExpression();
+        }
+    }
 }

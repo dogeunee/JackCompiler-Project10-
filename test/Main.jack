@@ -12,7 +12,8 @@ class Main {
     function void main() {
         var SquareGame game;
         let game = game;
-        do game(d);
+        do game.run();
+        do game.dispose();
         return;
     }
 

@@ -153,10 +153,6 @@ void JackTokenizer::advance()
     {
         advance();
     }
-    else
-    {
-        cout << token << "\n";
-    }
 }
 
 void JackTokenizer::advance2()
