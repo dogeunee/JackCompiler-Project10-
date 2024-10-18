@@ -21,7 +21,7 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 // ofile
-                cout << "\t<keyword> " << tokenizer.keyWord() << " </keyword>\n";
+                ofile << "\t<keyword> " << tokenizer.keyWord() << " </keyword>\n";
             }
             break;
         case SYMBOL:
@@ -33,20 +33,20 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
             else
             {
                 // ofile
-                cout << "\t<symbol> " << tokenizer.symbol() << " </symbol>\n";
+                ofile << "\t<symbol> " << tokenizer.symbol() << " </symbol>\n";
             }
             break;
         case IDENTIFIER:
             // ofile
-            cout << "\t<identifier> " << tokenizer.identifier() << " </identifier>\n";
+            ofile << "\t<identifier> " << tokenizer.identifier() << " </identifier>\n";
             break;
         case INT_CONST:
             // ofile
-            cout << "\t<integerConstant> " << tokenizer.intVal() << " </integerConstant>\n";
+            ofile << "\t<integerConstant> " << tokenizer.intVal() << " </integerConstant>\n";
             break;
         case STRING_CONST:
             // ofile
-            cout << "\t<stringConstant> " << tokenizer.stringVal() << " </stringConstant>\n";
+            ofile << "\t<stringConstant> " << tokenizer.stringVal() << " </stringConstant>\n";
             break;
         }
         if (tokenizer.hasMoreTokens())
@@ -59,7 +59,7 @@ void CompilationEngine::eat(string str, TokenType in_ttype)
 void CompilationEngine::compileClass()
 {
     // ofile
-    cout << "<class>\n";
+    ofile << "<class>\n";
     eat("class", KEYWORD);
     eat("", IDENTIFIER);
     eat("{", SYMBOL);
@@ -73,12 +73,12 @@ void CompilationEngine::compileClass()
     }
     eat("}", SYMBOL);
     // ofile
-    cout << "</class>\n";
+    ofile << "</class>\n";
 }
 void CompilationEngine::complieClassVarDec()
 {
     // ofile
-    cout << "<classVarDec>\n";
+    ofile << "<classVarDec>\n";
     if (tokenizer.keyWord() == "static")
     {
         eat("static", KEYWORD);
@@ -115,13 +115,13 @@ void CompilationEngine::complieClassVarDec()
     }
     eat(";", SYMBOL);
     // ofile
-    cout << "</classVarDec>\n";
+    ofile << "</classVarDec>\n";
 }
 
 void CompilationEngine::compileSubroutine()
 {
     // ofile
-    cout << "<subroutineDec>\n";
+    ofile << "<subroutineDec>\n";
     if (tokenizer.keyWord() == "constructor")
     {
         eat("constructor", KEYWORD);
@@ -164,7 +164,7 @@ void CompilationEngine::compileSubroutine()
     // subroutine body
 
     // ofile
-    cout << "<subroutineBody>\n";
+    ofile << "<subroutineBody>\n";
     eat("{", SYMBOL);
     while (tokenizer.keyWord() == "var")
     {
@@ -173,14 +173,14 @@ void CompilationEngine::compileSubroutine()
     compileStatements();
     eat("}", SYMBOL);
     // ofile
-    cout << "</subroutineBody>\n";
+    ofile << "</subroutineBody>\n";
     // ofile
-    cout << "</subroutineDec>\n";
+    ofile << "</subroutineDec>\n";
 }
 void CompilationEngine::compileParameterList()
 {
     // ofile
-    cout << "<parameterList>\n";
+    ofile << "<parameterList>\n";
     if (tokenizer.symbol() != ')')
     {
         if (tokenizer.keyWord() == "int")
@@ -225,12 +225,12 @@ void CompilationEngine::compileParameterList()
         eat(";", SYMBOL);
     }
     // ofile
-    cout << "</parameterList>\n";
+    ofile << "</parameterList>\n";
 }
 void CompilationEngine::compileVarDec()
 {
     // ofile
-    cout << "<varDec>\n";
+    ofile << "<varDec>\n";
     eat("var", KEYWORD);
     if (tokenizer.keyWord() == "int")
     {
@@ -256,12 +256,12 @@ void CompilationEngine::compileVarDec()
     }
     eat(";", SYMBOL);
     // ofile
-    cout << "</varDec>\n";
+    ofile << "</varDec>\n";
 }
 void CompilationEngine::compileStatements()
 {
     // ofile
-    cout << "<statements>\n";
+    ofile << "<statements>\n";
     string start = tokenizer.keyWord();
     while (start == "let" || start == "if" || start == "while" || start == "do" || start == "return")
     {
@@ -288,12 +288,12 @@ void CompilationEngine::compileStatements()
         start = tokenizer.keyWord();
     }
     // ofile
-    cout << "</statements>\n";
+    ofile << "</statements>\n";
 }
 
 void CompilationEngine::compileDo()
 {
-    cout << "<doStatement>\n";
+    ofile << "<doStatement>\n";
     eat("do", KEYWORD);
     // subroutineCall
     eat("", IDENTIFIER);
@@ -312,11 +312,11 @@ void CompilationEngine::compileDo()
         eat(")", SYMBOL);
     }
     eat(";", SYMBOL);
-    cout << "</doStatement>\n";
+    ofile << "</doStatement>\n";
 }
 void CompilationEngine::compileLet()
 {
-    cout << "<letStatement>\n";
+    ofile << "<letStatement>\n";
     eat("let", KEYWORD);
     eat("", IDENTIFIER);
     if (tokenizer.symbol() == '[')
@@ -329,12 +329,12 @@ void CompilationEngine::compileLet()
     // compileExpression();
     eat("", IDENTIFIER);
     eat(";", SYMBOL);
-    cout << "</letStatement>\n";
+    ofile << "</letStatement>\n";
 }
 void CompilationEngine::compileWhile()
 {
     // ofile
-    cout << "<whileStatement>\n";
+    ofile << "<whileStatement>\n";
     eat("while", KEYWORD);
     eat("(", SYMBOL);
     eat("", IDENTIFIER);
@@ -344,12 +344,12 @@ void CompilationEngine::compileWhile()
     eat("}", SYMBOL);
     eat(";", SYMBOL);
     // ofile
-    cout << "</whileStatement>\n";
+    ofile << "</whileStatement>\n";
 }
 void CompilationEngine::compileReturn()
 {
     // ofile
-    cout << "<returnStatement>\n";
+    ofile << "<returnStatement>\n";
     eat("return", KEYWORD);
     if (!(tokenizer.symbol() == ';'))
     {
@@ -357,12 +357,12 @@ void CompilationEngine::compileReturn()
     }
     eat(";", SYMBOL);
     // ofile
-    cout << "</returnStatement>\n";
+    ofile << "</returnStatement>\n";
 }
 void CompilationEngine::compileIf()
 {
     // ofile
-    cout << "<ifStatement>\n";
+    ofile << "<ifStatement>\n";
     eat("if", KEYWORD);
     eat("(", SYMBOL);
     eat("", IDENTIFIER);
@@ -378,7 +378,7 @@ void CompilationEngine::compileIf()
         eat("}", SYMBOL);
     }
     // ofile
-    cout << "</ifStatement>\n";
+    ofile << "</ifStatement>\n";
 }
 void CompilationEngine::compileExpression()
 {
