@@ -45,11 +45,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-/*{
-    JackTokenizer jack;
-    jack.initFilename("test/Main.jack");
-    while (jack.hasMoreTokens())
-    {
-        jack.advance();
-    }
-}*/
