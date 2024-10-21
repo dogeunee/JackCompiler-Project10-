@@ -34,3 +34,35 @@ enum KeyWord
     _NULL,
     THIS
 };
+
+enum kind
+{
+    STATIC,
+    FIELD,
+    ARG,
+    VAR,
+    NONE
+};
+enum segment
+{
+    CONST,
+    ARG,
+    LOCAL,
+    STATIC,
+    THIS,
+    THAT,
+    POINTER,
+    TEMP
+};
+enum command
+{
+    ADD,
+    SUB,
+    NEG,
+    EQ,
+    GT,
+    LT,
+    AND,
+    OR,
+    NOT
+};
