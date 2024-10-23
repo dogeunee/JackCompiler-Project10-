@@ -1,27 +1,27 @@
 #include "JackTokenizer.h"
 JackTokenizer::JackTokenizer()
 {
-    keywordMap.insert({"class", CLASS});
-    keywordMap.insert({"constructor", CONSTRUCTOR});
-    keywordMap.insert({"function", FUNCTION});
-    keywordMap.insert({"method", METHOD});
-    keywordMap.insert({"field", FIELD});
-    keywordMap.insert({"static", STATIC});
-    keywordMap.insert({"var", VAR});
-    keywordMap.insert({"int", INT});
-    keywordMap.insert({"char", CHAR});
-    keywordMap.insert({"boolean", BOOLEAN});
-    keywordMap.insert({"void", VOID});
-    keywordMap.insert({"true", TRUE});
-    keywordMap.insert({"false", FALSE});
-    keywordMap.insert({"null", _NULL});
-    keywordMap.insert({"this", THIS});
-    keywordMap.insert({"let", LET});
-    keywordMap.insert({"do", DO});
-    keywordMap.insert({"if", IF});
-    keywordMap.insert({"else", ELSE});
-    keywordMap.insert({"while", WHILE});
-    keywordMap.insert({"return", RETURN});
+    keywordMap.insert({"class", KeyWord::KeyWord::CLASS});
+    keywordMap.insert({"constructor", KeyWord::KeyWord::CONSTRUCTOR});
+    keywordMap.insert({"function", KeyWord::KeyWord::FUNCTION});
+    keywordMap.insert({"method", KeyWord::KeyWord::METHOD});
+    keywordMap.insert({"field", KeyWord::KeyWord::FIELD});
+    keywordMap.insert({"static", KeyWord::KeyWord::STATIC});
+    keywordMap.insert({"var", KeyWord::KeyWord::VAR});
+    keywordMap.insert({"int", KeyWord::KeyWord::INT});
+    keywordMap.insert({"char", KeyWord::KeyWord::CHAR});
+    keywordMap.insert({"boolean", KeyWord::KeyWord::BOOLEAN});
+    keywordMap.insert({"void", KeyWord::KeyWord::VOID});
+    keywordMap.insert({"true", KeyWord::KeyWord::TRUE});
+    keywordMap.insert({"false", KeyWord::KeyWord::FALSE});
+    keywordMap.insert({"null", KeyWord::KeyWord::_NULL});
+    keywordMap.insert({"this", KeyWord::KeyWord::THIS});
+    keywordMap.insert({"let", KeyWord::KeyWord::LET});
+    keywordMap.insert({"do", KeyWord::KeyWord::DO});
+    keywordMap.insert({"if", KeyWord::KeyWord::IF});
+    keywordMap.insert({"else", KeyWord::KeyWord::ELSE});
+    keywordMap.insert({"while", KeyWord::KeyWord::WHILE});
+    keywordMap.insert({"return", KeyWord::KeyWord::RETURN});
     symbolSet.insert('{');
     symbolSet.insert('}');
     symbolSet.insert('(');
@@ -58,27 +58,27 @@ JackTokenizer::JackTokenizer(string filename)
 {
     ifile.open(filename);
     ifile.get(c);
-    keywordMap.insert({"class", CLASS});
-    keywordMap.insert({"constructor", CONSTRUCTOR});
-    keywordMap.insert({"function", FUNCTION});
-    keywordMap.insert({"method", METHOD});
-    keywordMap.insert({"field", FIELD});
-    keywordMap.insert({"static", STATIC});
-    keywordMap.insert({"var", VAR});
-    keywordMap.insert({"int", INT});
-    keywordMap.insert({"char", CHAR});
-    keywordMap.insert({"boolean", BOOLEAN});
-    keywordMap.insert({"void", VOID});
-    keywordMap.insert({"true", TRUE});
-    keywordMap.insert({"false", FALSE});
-    keywordMap.insert({"null", _NULL});
-    keywordMap.insert({"this", THIS});
-    keywordMap.insert({"let", LET});
-    keywordMap.insert({"do", DO});
-    keywordMap.insert({"if", IF});
-    keywordMap.insert({"else", ELSE});
-    keywordMap.insert({"while", WHILE});
-    keywordMap.insert({"return", RETURN});
+    keywordMap.insert({"class", KeyWord::KeyWord::CLASS});
+    keywordMap.insert({"constructor", KeyWord::KeyWord::CONSTRUCTOR});
+    keywordMap.insert({"function", KeyWord::KeyWord::FUNCTION});
+    keywordMap.insert({"method", KeyWord::KeyWord::METHOD});
+    keywordMap.insert({"field", KeyWord::KeyWord::FIELD});
+    keywordMap.insert({"static", KeyWord::KeyWord::STATIC});
+    keywordMap.insert({"var", KeyWord::KeyWord::VAR});
+    keywordMap.insert({"int", KeyWord::KeyWord::INT});
+    keywordMap.insert({"char", KeyWord::KeyWord::CHAR});
+    keywordMap.insert({"boolean", KeyWord::KeyWord::BOOLEAN});
+    keywordMap.insert({"void", KeyWord::KeyWord::VOID});
+    keywordMap.insert({"true", KeyWord::KeyWord::TRUE});
+    keywordMap.insert({"false", KeyWord::KeyWord::FALSE});
+    keywordMap.insert({"null", KeyWord::KeyWord::_NULL});
+    keywordMap.insert({"this", KeyWord::KeyWord::THIS});
+    keywordMap.insert({"let", KeyWord::KeyWord::LET});
+    keywordMap.insert({"do", KeyWord::KeyWord::DO});
+    keywordMap.insert({"if", KeyWord::KeyWord::IF});
+    keywordMap.insert({"else", KeyWord::KeyWord::ELSE});
+    keywordMap.insert({"while", KeyWord::KeyWord::WHILE});
+    keywordMap.insert({"return", KeyWord::KeyWord::RETURN});
     symbolSet.insert('{');
     symbolSet.insert('}');
     symbolSet.insert('(');
@@ -137,7 +137,7 @@ void JackTokenizer::advance()
     {
         if (symbolSetHas(c))
         {
-            tType = SYMBOL;
+            tType = TokenType::TokenType::SYMBOL;
             token = c;
             ifile.get(c);
             while (whiteSetHas(c) && hasMoreTokens())
@@ -145,12 +145,12 @@ void JackTokenizer::advance()
         }
         else if (isdigit(c))
         {
-            tType = INT_CONST;
+            tType = TokenType::TokenType::INT_CONST;
             advance2();
         }
         else if (c == '"')
         {
-            tType = STRING_CONST;
+            tType = TokenType::TokenType::STRING_CONST;
             ifile.get(c);
             advanceString();
         }
@@ -159,11 +159,11 @@ void JackTokenizer::advance()
             advance2();
             if (keywordMapHas(token))
             {
-                tType = KEYWORD;
+                tType = TokenType::TokenType::KEYWORD;
             }
             else
             {
-                tType = IDENTIFIER;
+                tType = TokenType::TokenType::IDENTIFIER;
             }
         }
     }
@@ -221,7 +221,7 @@ void JackTokenizer::handelComment()
     {
         ifile.seekg(-8, std::ios::cur);
         ifile.get(c);
-        tType = SYMBOL;
+        tType = TokenType::TokenType::SYMBOL;
         token = c;
         ifile.get(c);
         while (whiteSetHas(c) && hasMoreTokens())
@@ -263,7 +263,7 @@ void JackTokenizer::advanceComment2()
         ifile.get(c); // skip through space, \n, \t
 }
 
-TokenType JackTokenizer::tokenType()
+TokenType::TokenType JackTokenizer::tokenType()
 {
     return tType;
 }
@@ -309,19 +309,19 @@ void JackTokenizer::printToken()
 {
     switch (tType)
     {
-    case KEYWORD:
+    case TokenType::TokenType::KEYWORD:
         cout << "<keyword> " << token << " </keyword>\n";
         break;
-    case SYMBOL:
+    case TokenType::TokenType::SYMBOL:
         cout << "<symbol> " << token << " </symbol>\n";
         break;
-    case IDENTIFIER:
+    case TokenType::TokenType::IDENTIFIER:
         cout << "<identifier> " << token << " </identifier>\n";
         break;
-    case INT_CONST:
+    case TokenType::TokenType::INT_CONST:
         cout << "<integerConstant> " << token << " </integerConstant>\n";
         break;
-    case STRING_CONST:
+    case TokenType::TokenType::STRING_CONST:
         cout << "<stringConstant> " << token << " </stringConstant>\n";
         break;
     default:

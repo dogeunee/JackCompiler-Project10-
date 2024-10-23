@@ -19,7 +19,7 @@ public:
     void handelComment();
     void advanceComment1();
     void advanceComment2();
-    TokenType tokenType();
+    TokenType::TokenType tokenType();
     string keyWord();
     char symbol();
     string identifier();
@@ -33,10 +33,10 @@ public:
 
 private:
     ifstream ifile;
-    TokenType tType;
+    TokenType::TokenType tType;
     char c;
     string token = "";
-    std::map<string, KeyWord> keywordMap;
+    std::map<string, KeyWord::KeyWord> keywordMap;
     std::set<char> symbolSet;
     std::set<char> whiteSet;
     std::set<char> opSet;
