@@ -5,10 +5,10 @@
 
 namespace fs = std::filesystem;
 
-string changeToxml(string str1)
+string changeTovm(string str1)
 {
     std::filesystem::path filePath(str1);
-    filePath.replace_extension(".xml");
+    filePath.replace_extension(".vm");
     string fileName = filePath.filename().string();
     string newPath = "output/" + fileName;
     return newPath;
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
     vector<fs::path> FileList;
     if (fs::is_regular_file(p))
     {
-        CompilationEngine compEngine(str1, changeToxml(str1));
+        CompilationEngine compEngine(str1, changeTovm(str1));
         compEngine.compileClass();
     }
     else if (fs::is_directory(p))
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
         }
         for (fs::path file : FileList)
         {
-            CompilationEngine compEngine(file.string(), changeToxml(file.string()));
+            CompilationEngine compEngine(file.string(), changeTovm(file.string()));
             compEngine.compileClass();
         }
     }

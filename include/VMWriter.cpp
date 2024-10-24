@@ -38,13 +38,13 @@ void VMWriter::writeFunction(string name, int nLocals)
 }
 void VMWriter::writeReturn()
 {
-    ofile << "return";
+    ofile << "return\n";
 }
 void VMWriter::close()
 {
     ofile.close();
 }
-string segReturn(segment::segment seg)
+string VMWriter::segReturn(segment::segment seg)
 {
     switch (seg)
     {
@@ -75,7 +75,7 @@ string segReturn(segment::segment seg)
     }
     return "not a segement";
 }
-string commandReturn(command::command cmd)
+string VMWriter::commandReturn(command::command cmd)
 {
     switch (cmd)
     {
@@ -106,5 +106,12 @@ string commandReturn(command::command cmd)
     case command::NOT:
         return "not";
         break;
+    case command::MULT:
+        return "call Math.multiply 2";
+        break;
+    case command::DIV:
+        return "call Math.divide 2";
+        break;
     }
+    return "not a command";
 }

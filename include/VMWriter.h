@@ -18,6 +18,9 @@ public:
     void writeReturn();
     void close();
 
+    string segReturn(segment::segment seg);
+    string commandReturn(command::command cmd);
+
 private:
     ofstream ofile;
 };

@@ -77,6 +77,8 @@ namespace command
         LT,
         AND,
         OR,
-        NOT
+        NOT,
+        MULT,
+        DIV
     };
 };

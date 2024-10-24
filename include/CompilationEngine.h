@@ -2,6 +2,7 @@
 #include <fstream>
 #include "JackTokenizer.h"
 #include "SymbolTable.h"
+#include "VMWriter.h"
 using namespace std;
 class CompilationEngine
 {
@@ -20,7 +21,7 @@ public:
     void compileIf();
     void compileExpression();
     void compileTerm();
-    void compileExpressionList();
+    int compileExpressionList();
     void eat(string str, TokenType::TokenType tokenType);
 
 private:
@@ -28,4 +29,5 @@ private:
     ofstream ofile;
     JackTokenizer tokenizer;
     SymbolTable symbolTable;
+    VMWriter vmWriter;
 };
