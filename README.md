@@ -1,4 +1,4 @@
-# Jack compiler
+# Jack compiler (NAND2TETRIS Project 10,11)
 ### written in C++, succesfully passed all the provided test files using the provided VMEmulator
 
 **notes**
