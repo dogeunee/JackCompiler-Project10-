@@ -6,6 +6,6 @@
 
 
 1.JackTokenizer
--I figured a way to use one character at a time as I thought it was the intened way but parsing line by line could work.
+- I figured a way to use one character at a time as I thought it was the intened way but parsing line by line could work.
 2.Compilation Engine
--This is where most of your code will be. There is no right way of writing this part. One tip would be trying to implement partially by doing the tests one by one.
+- This is where most of your code will be. There is no right way of writing this part. One tip would be trying to implement partially by doing the tests one by one.
