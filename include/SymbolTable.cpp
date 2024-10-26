@@ -96,11 +96,23 @@ int SymbolTable::varCount(kind::kind _kind)
 {
     if (_kind == kind::ARG || _kind == kind::VAR)
     {
-        return subroutineScopeVarCount[_kind];
+        auto iter = subroutineScopeVarCount.find(_kind);
+        if (iter == subroutineScopeVarCount.end())
+        {
+            return -1;
+        }
+        else
+            return subroutineScopeVarCount[_kind];
     }
     else if (_kind == kind::STATIC || _kind == kind::FIELD)
     {
-        return classScopeVarCount[_kind];
+        auto iter = classScopeVarCount.find(_kind);
+        if (iter == classScopeVarCount.end())
+        {
+            return -1;
+        }
+        else
+            return classScopeVarCount[_kind];
     }
     return -1;
 }

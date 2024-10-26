@@ -23,6 +23,8 @@ public:
     void compileTerm();
     int compileExpressionList();
     void eat(string str, TokenType::TokenType tokenType);
+    segment::segment kindToSeg(kind::kind kind);
+    string labelGen();
 
 private:
     ifstream ifile;
@@ -30,4 +32,5 @@ private:
     JackTokenizer tokenizer;
     SymbolTable symbolTable;
     VMWriter vmWriter;
+    int labelint = 0;
 };

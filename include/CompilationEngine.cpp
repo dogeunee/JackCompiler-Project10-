@@ -157,7 +157,7 @@ void CompilationEngine::complieClassVarDec()
     else
     {
 
-        symbolTable.settype("class");
+        symbolTable.settype(tokenizer.identifier());
         eat("", TokenType::TokenType::IDENTIFIER);
     }
 
@@ -180,6 +180,7 @@ void CompilationEngine::compileSubroutine()
     // //ofile
     symbolTable.startSubroutine();
     // ofile << "<subroutineDec>\n";
+    string subroutineType = tokenizer.keyWord();
     if (tokenizer.keyWord() == "constructor")
     {
         eat("constructor", TokenType::TokenType::KEYWORD);
@@ -222,29 +223,31 @@ void CompilationEngine::compileSubroutine()
     compileParameterList();
     eat(")", TokenType::TokenType::SYMBOL);
     // subroutine body
-
-    // //ofile
-    // ofile << "<subroutineBody>\n";
     eat("{", TokenType::TokenType::SYMBOL);
     while (tokenizer.keyWord() == "var")
     {
         symbolTable.setkind(kind::VAR);
         compileVarDec();
     }
-    vmWriter.writeFunction(symbolTable.classname + "." + subroutineName, symbolTable.varCount(kind::kind::VAR));
-
+    vmWriter.writeFunction(symbolTable.classname + "." + subroutineName, symbolTable.varCount(kind::kind::VAR) + 1);
+    if (subroutineType == "constructor")
+    {
+        int classFieldNum = symbolTable.varCount(kind::FIELD) + 1;
+        vmWriter.writePop(segment::CONST, classFieldNum);
+        vmWriter.writeCall("Memory.alloc", 1);
+        vmWriter.writePop(segment::POINTER, 0);
+    }
+    else if (subroutineType == "method")
+    {
+        vmWriter.writePush(segment::ARG, 0);
+        vmWriter.writePop(segment::POINTER, 0);
+    }
     compileStatements();
     eat("}", TokenType::TokenType::SYMBOL);
-    // //ofile
-    // ofile << "</subroutineBody>\n";
-    // //ofile
-    // ofile << "</subroutineDec>\n";
 }
 void CompilationEngine::compileParameterList()
 {
-    // //ofile
     // setkind is ARG
-    // ofile << "<parameterList>\n";
     if (tokenizer.symbol() != ')')
     {
         if (tokenizer.keyWord() == "int")
@@ -264,7 +267,6 @@ void CompilationEngine::compileParameterList()
         }
         else
         {
-
             symbolTable.settype("class");
             eat("", TokenType::TokenType::IDENTIFIER);
         }
@@ -292,7 +294,6 @@ void CompilationEngine::compileParameterList()
             }
             else
             {
-
                 symbolTable.settype("class");
                 eat("", TokenType::TokenType::IDENTIFIER);
             }
@@ -301,8 +302,6 @@ void CompilationEngine::compileParameterList()
             symbolTable.setflag(false);
         }
     }
-    // //ofile
-    // ofile << "</parameterList>\n";
 }
 void CompilationEngine::compileVarDec()
 {
@@ -325,7 +324,6 @@ void CompilationEngine::compileVarDec()
     }
     else
     {
-
         symbolTable.settype(tokenizer.identifier());
         eat("", TokenType::TokenType::IDENTIFIER);
     }
@@ -388,13 +386,21 @@ void CompilationEngine::compileDo()
     eat("", TokenType::TokenType::IDENTIFIER);
     if (tokenizer.symbol() == '(')
     {
+        // method
+        vmWriter.writePush(segment::segment::POINTER, 0);
         eat("(", TokenType::TokenType::SYMBOL);
         int nargs = compileExpressionList();
         eat(")", TokenType::TokenType::SYMBOL);
-        vmWriter.writeCall(symbolTable.classname + "." + first, nargs);
+        vmWriter.writeCall(symbolTable.classname + "." + first, nargs + 1);
     }
     else if (tokenizer.symbol() == '.')
     {
+        if (firsttype != "null")
+        { // object
+            segment::segment seg = kindToSeg(symbolTable.kindOf(first));
+            int index = symbolTable.indexOf(first);
+            vmWriter.writePush(seg, index);
+        }
         eat(".", TokenType::TokenType::SYMBOL);
         string second = tokenizer.identifier();
         eat("", TokenType::TokenType::IDENTIFIER);
@@ -403,22 +409,21 @@ void CompilationEngine::compileDo()
         eat(")", TokenType::TokenType::SYMBOL);
         if (firsttype != "null")
         { // object
-            vmWriter.writeCall(firsttype + "." + second, nargs);
+            vmWriter.writeCall(firsttype + "." + second, nargs + 1);
         }
         else
-        {
+        { // class call
             vmWriter.writeCall(first + "." + second, nargs);
         }
     }
     eat(";", TokenType::TokenType::SYMBOL);
-    // ofile << "</doStatement>\n";
+    vmWriter.writePop(segment::segment::TEMP, 0);
 }
 
 void CompilationEngine::compileLet()
 {
-    // ofile << "<letStatement>\n";
-
     eat("let", TokenType::TokenType::KEYWORD);
+    string leftHand = tokenizer.identifier();
     eat("", TokenType::TokenType::IDENTIFIER);
     if (tokenizer.symbol() == '[')
     {
@@ -429,21 +434,27 @@ void CompilationEngine::compileLet()
     eat("=", TokenType::TokenType::SYMBOL);
     compileExpression();
     eat(";", TokenType::TokenType::SYMBOL);
-    // ofile << "</letStatement>\n";
+    segment::segment seg = kindToSeg(symbolTable.kindOf(leftHand));
+    int index = symbolTable.indexOf(leftHand);
+    vmWriter.writePop(seg, index);
 }
+
 void CompilationEngine::compileWhile()
 {
-    // //ofile
-    // ofile << "<whileStatement>\n";
+    string firstlabel = labelGen();
+    string secondlabel = labelGen();
+    vmWriter.writeLabel(firstlabel);
     eat("while", TokenType::TokenType::KEYWORD);
     eat("(", TokenType::TokenType::SYMBOL);
     compileExpression();
+    vmWriter.writeArithmetic(command::command::NOT);
+    vmWriter.writeIf(secondlabel);
     eat(")", TokenType::TokenType::SYMBOL);
     eat("{", TokenType::TokenType::SYMBOL);
     compileStatements();
     eat("}", TokenType::TokenType::SYMBOL);
-    // //ofile
-    // ofile << "</whileStatement>\n";
+    vmWriter.writeGoto(firstlabel);
+    vmWriter.writeLabel(secondlabel);
 }
 void CompilationEngine::compileReturn()
 {
@@ -461,14 +472,18 @@ void CompilationEngine::compileReturn()
 }
 void CompilationEngine::compileIf()
 {
-    // //ofile
-    // ofile << "<ifStatement>\n";
+    string firstlabel = labelGen();
+    string secondlabel = labelGen();
     eat("if", TokenType::TokenType::KEYWORD);
     eat("(", TokenType::TokenType::SYMBOL);
     compileExpression();
+    vmWriter.writeArithmetic(command::command::NOT);
+    vmWriter.writeIf(firstlabel);
     eat(")", TokenType::TokenType::SYMBOL);
     eat("{", TokenType::TokenType::SYMBOL);
     compileStatements();
+    vmWriter.writeGoto(secondlabel);
+    vmWriter.writeLabel(firstlabel);
     eat("}", TokenType::TokenType::SYMBOL);
     if (tokenizer.keyWord() == "else")
     {
@@ -477,8 +492,7 @@ void CompilationEngine::compileIf()
         compileStatements();
         eat("}", TokenType::TokenType::SYMBOL);
     }
-    // //ofile
-    // ofile << "</ifStatement>\n";
+    vmWriter.writeLabel(secondlabel);
 }
 void CompilationEngine::compileExpression()
 {
@@ -533,7 +547,8 @@ void CompilationEngine::compileTerm()
         {
             if (tokenizer.keyWord() == "true")
             {
-                vmWriter.writePush(segment::CONST, -1);
+                vmWriter.writePush(segment::CONST, 1);
+                vmWriter.writeArithmetic(command::NEG);
             }
             else if (tokenizer.keyWord() == "false")
             {
@@ -591,13 +606,19 @@ void CompilationEngine::compileTerm()
         // subroutine call
         else if (tokenizer.symbol() == '(')
         { // method
+            vmWriter.writePush(segment::segment::POINTER, 0);
             eat("(", TokenType::TokenType::SYMBOL);
             int nargs = compileExpressionList();
             eat(")", TokenType::TokenType::SYMBOL);
-            vmWriter.writeCall(symbolTable.classname + "." + first, nargs);
+            vmWriter.writeCall(symbolTable.classname + "." + first, nargs + 1);
         }
+
         else if (tokenizer.symbol() == '.')
         {
+            if (firsttype != "null")
+            {
+                vmWriter.writePush(kindToSeg(symbolTable.kindOf(first)), symbolTable.indexOf(first));
+            }
             eat(".", TokenType::TokenType::SYMBOL);
             string second = tokenizer.identifier();
             eat("", TokenType::TokenType::IDENTIFIER);
@@ -606,7 +627,7 @@ void CompilationEngine::compileTerm()
             eat(")", TokenType::TokenType::SYMBOL);
             if (firsttype != "null")
             { // object
-                vmWriter.writeCall(firsttype + "." + second, nargs);
+                vmWriter.writeCall(firsttype + "." + second, nargs + 1);
             }
             else
             {
@@ -615,7 +636,9 @@ void CompilationEngine::compileTerm()
         }
         else
         {
-            // normal variable!
+            segment::segment seg = kindToSeg(symbolTable.kindOf(first));
+            int index = symbolTable.indexOf(first);
+            vmWriter.writePush(seg, index);
         }
         break;
     }
@@ -636,4 +659,30 @@ int CompilationEngine::compileExpressionList()
         }
     }
     return num;
+}
+
+segment::segment CompilationEngine::kindToSeg(kind::kind kind)
+{
+    switch (kind)
+    {
+    case kind::kind::ARG:
+        return segment::segment::ARG;
+        break;
+    case kind::kind::FIELD:
+        return segment::segment::THIS;
+        break;
+    case kind::kind::STATIC:
+        return segment::segment::STATIC;
+        break;
+    case kind::kind::VAR:
+        return segment::segment::LOCAL;
+        break;
+    }
+    return segment::segment::TEMP;
+}
+
+string CompilationEngine::labelGen()
+{
+    string str = "L" + to_string(++labelint);
+    return str;
 }
