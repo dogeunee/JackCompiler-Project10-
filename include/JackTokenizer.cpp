@@ -219,10 +219,8 @@ void JackTokenizer::handelComment()
     }
     else
     {
-        ifile.seekg(-8, std::ios::cur);
-        ifile.get(c);
         tType = TokenType::TokenType::SYMBOL;
-        token = c;
+        token = '/';
         ifile.get(c);
         while (whiteSetHas(c) && hasMoreTokens())
             ifile.get(c);

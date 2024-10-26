@@ -42,6 +42,5 @@ int main(int argc, char *argv[])
             compEngine.compileClass();
         }
     }
-
     return 0;
 }

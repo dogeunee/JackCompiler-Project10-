@@ -27,7 +27,7 @@ void CompilationEngine::eat(string str, TokenType::TokenType in_ttype)
             if (str != symbol)
             {
                 std::cout << "wrong symbol\n"
-                          << str << " , " << symbol;
+                          << str << " , " << symbol << " " << tokenizer.identifier() << "\n";
             }
             else
             {
@@ -233,7 +233,7 @@ void CompilationEngine::compileSubroutine()
     if (subroutineType == "constructor")
     {
         int classFieldNum = symbolTable.varCount(kind::FIELD) + 1;
-        vmWriter.writePop(segment::CONST, classFieldNum);
+        vmWriter.writePush(segment::CONST, classFieldNum);
         vmWriter.writeCall("Memory.alloc", 1);
         vmWriter.writePop(segment::POINTER, 0);
     }
@@ -422,21 +422,36 @@ void CompilationEngine::compileDo()
 
 void CompilationEngine::compileLet()
 {
+    bool lefthandIsArr = false;
     eat("let", TokenType::TokenType::KEYWORD);
     string leftHand = tokenizer.identifier();
     eat("", TokenType::TokenType::IDENTIFIER);
+
     if (tokenizer.symbol() == '[')
     {
+        lefthandIsArr = true;
+        vmWriter.writePush(kindToSeg(symbolTable.kindOf(leftHand)), symbolTable.indexOf(leftHand));
         eat("[", TokenType::TokenType::SYMBOL);
         compileExpression();
         eat("]", TokenType::TokenType::SYMBOL);
+        vmWriter.writeArithmetic(command::ADD);
     }
     eat("=", TokenType::TokenType::SYMBOL);
     compileExpression();
     eat(";", TokenType::TokenType::SYMBOL);
-    segment::segment seg = kindToSeg(symbolTable.kindOf(leftHand));
-    int index = symbolTable.indexOf(leftHand);
-    vmWriter.writePop(seg, index);
+    if (lefthandIsArr)
+    {
+        vmWriter.writePop(segment::segment::TEMP, 0);
+        vmWriter.writePop(segment::segment::POINTER, 1);
+        vmWriter.writePush(segment::segment::TEMP, 0);
+        vmWriter.writePop(segment::segment::THAT, 0);
+    }
+    else
+    {
+        segment::segment seg = kindToSeg(symbolTable.kindOf(leftHand));
+        int index = symbolTable.indexOf(leftHand);
+        vmWriter.writePop(seg, index);
+    }
 }
 
 void CompilationEngine::compileWhile()
@@ -464,6 +479,10 @@ void CompilationEngine::compileReturn()
     if (!(tokenizer.symbol() == ';'))
     {
         compileExpression();
+    }
+    else
+    {
+        vmWriter.writePush(segment::CONST, 0);
     }
     eat(";", TokenType::TokenType::SYMBOL);
     vmWriter.writeReturn();
@@ -540,6 +559,7 @@ void CompilationEngine::compileTerm()
 {
     // ofile << "<term>\n";
     TokenType::TokenType tType = tokenizer.tokenType();
+    string str = tokenizer.stringVal();
     switch (tType)
     {
     case TokenType::TokenType::KEYWORD:
@@ -572,6 +592,13 @@ void CompilationEngine::compileTerm()
     case TokenType::TokenType::STRING_CONST:
         // string?
         eat(tokenizer.stringVal(), TokenType::TokenType::STRING_CONST);
+        vmWriter.writePush(segment::CONST, str.length());
+        vmWriter.writeCall("String.new", 1);
+        for (int i = 0; i < str.length(); i++)
+        {
+            vmWriter.writePush(segment::CONST, str[i]);
+            vmWriter.writeCall("String.appendChar", 2);
+        }
         break;
     case TokenType::TokenType::SYMBOL:
         if (tokenizer.symbol() == '(')
@@ -599,9 +626,13 @@ void CompilationEngine::compileTerm()
         eat("", TokenType::TokenType::IDENTIFIER);
         if (tokenizer.symbol() == '[')
         {
+            vmWriter.writePush(kindToSeg(symbolTable.kindOf(first)), symbolTable.indexOf(first));
             eat("[", TokenType::TokenType::SYMBOL);
             compileExpression();
             eat("]", TokenType::TokenType::SYMBOL);
+            vmWriter.writeArithmetic(command::ADD);
+            vmWriter.writePop(segment::POINTER, 1);
+            vmWriter.writePush(segment::THAT, 0);
         }
         // subroutine call
         else if (tokenizer.symbol() == '(')

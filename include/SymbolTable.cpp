@@ -72,7 +72,7 @@ void SymbolTable::define(string _name)
             entry.index = num;
         }
         classScopeTable[_name] = entry;
-        cout << "symbolTable.cpp define() > name: " << _name << " currentKind: " << classScopeTable[_name].kind << " currentType: " << classScopeTable[_name].type << "\n";
+        // cout << "symbolTable.cpp define() > name: " << _name << " currentKind: " << classScopeTable[_name].kind << " currentType: " << classScopeTable[_name].type << "\n";
     }
     else if (entry.kind == kind::ARG || entry.kind == kind::VAR)
     {
@@ -89,7 +89,7 @@ void SymbolTable::define(string _name)
             entry.index = num;
         }
         subroutineScopeTable[_name] = entry;
-        cout << "symbolTable.cpp define() > name: " << _name << " currentKind: " << subroutineScopeTable[_name].kind << " currentType: " << subroutineScopeTable[_name].type << "\n";
+        // cout << "symbolTable.cpp define() > name: " << _name << " currentKind: " << subroutineScopeTable[_name].kind << " currentType: " << subroutineScopeTable[_name].type << "\n";
     }
 }
 int SymbolTable::varCount(kind::kind _kind)

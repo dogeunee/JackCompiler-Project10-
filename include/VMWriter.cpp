@@ -64,7 +64,7 @@ string VMWriter::segReturn(segment::segment seg)
         return "this";
         break;
     case segment::THAT:
-        return "this";
+        return "that";
         break;
     case segment::POINTER:
         return "pointer";
